@@ -1,0 +1,237 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "influxdb", "name": "InfluxDB", "version": "1.0.0" },
+    { "type": "panel", "id": "graph", "name": "Graph", "version": "" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "" }
+  ],
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Virtual Users",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "datasource": "InfluxDB",
+          "query": "SELECT last(\"value\") FROM \"vus\" WHERE $timeFilter",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 250 },
+              { "color": "red", "value": 450 }
+            ]
+          },
+          "unit": "short",
+          "displayName": "Active VUs"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Request Rate (req/s)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [
+        {
+          "datasource": "InfluxDB",
+          "query": "SELECT mean(\"value\") FROM \"http_reqs\" WHERE $timeFilter GROUP BY time(10s) fill(0)",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["mean"] },
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null }
+            ]
+          },
+          "unit": "reqps",
+          "displayName": "Req/s"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "p95 Response Time",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "datasource": "InfluxDB",
+          "query": "SELECT percentile(\"value\", 95) FROM \"http_req_duration\" WHERE $timeFilter GROUP BY time(30s) fill(null)",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 400 },
+              { "color": "red", "value": 500 }
+            ]
+          },
+          "unit": "ms",
+          "displayName": "p95 Duration"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Error Rate (%)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "datasource": "InfluxDB",
+          "query": "SELECT mean(\"value\") * 100 FROM \"http_req_failed\" WHERE $timeFilter GROUP BY time(10s) fill(0)",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["mean"] },
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.5 },
+              { "color": "red", "value": 1 }
+            ]
+          },
+          "unit": "percent",
+          "displayName": "Error Rate"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Response Time Percentiles",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 16, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "datasource": "InfluxDB",
+          "query": "SELECT percentile(\"value\", 50) AS \"p50\", percentile(\"value\", 90) AS \"p90\", percentile(\"value\", 95) AS \"p95\", percentile(\"value\", 99) AS \"p99\" FROM \"http_req_duration\" WHERE $timeFilter GROUP BY time(10s) fill(null)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ms" },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "p95" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "p99" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Virtual Users Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 4 },
+      "targets": [
+        {
+          "datasource": "InfluxDB",
+          "query": "SELECT last(\"value\") FROM \"vus\" WHERE $timeFilter GROUP BY time(10s) fill(previous)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "fixedColor": "blue", "mode": "fixed" }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "HTTP Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
+      "targets": [
+        {
+          "datasource": "InfluxDB",
+          "query": "SELECT mean(\"value\") FROM \"http_reqs\" WHERE $timeFilter GROUP BY time(10s) fill(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "reqps" }
+      }
+    },
+    {
+      "id": 8,
+      "title": "HTTP Failures Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
+      "targets": [
+        {
+          "datasource": "InfluxDB",
+          "query": "SELECT mean(\"value\") * 100 FROM \"http_req_failed\" WHERE $timeFilter GROUP BY time(10s) fill(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "fixedColor": "red", "mode": "fixed" },
+          "custom": { "fillOpacity": 10 }
+        }
+      }
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "tags": ["k6", "performance", "load-testing"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "k6 Load Testing",
+  "uid": "k6-load-testing",
+  "version": 1
+}
