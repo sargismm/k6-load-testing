@@ -4,6 +4,10 @@
 
 This framework covers three test types (load, stress, spike), streams metrics to InfluxDB, visualizes them in a Grafana dashboard, generates HTML reports, and integrates into CI/CD with automated pass/fail threshold gates.
 
+## Report example
+
+![k6 HTML summary report](k6-report-example.png)
+
 ---
 
 ## What it achieves

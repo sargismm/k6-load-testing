@@ -4,3 +4,4 @@ reports/*.json
 *.log
 .DS_Store
 *.png
+!k6-report-example.png
