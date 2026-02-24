@@ -1,0 +1,20 @@
+{
+  "name": "k6-load-testing",
+  "version": "1.0.0",
+  "description": "k6 Load Testing Framework — load, stress, and spike scenarios with InfluxDB + Grafana",
+  "scripts": {
+    "test:load":          "k6 run tests/load-test.js",
+    "test:stress":        "k6 run tests/stress-test.js",
+    "test:spike":         "k6 run tests/spike-test.js",
+
+    "test:load:influx":   "k6 run --out influxdb=http://localhost:8086/k6 tests/load-test.js",
+    "test:stress:influx": "k6 run --out influxdb=http://localhost:8086/k6 tests/stress-test.js",
+    "test:spike:influx":  "k6 run --out influxdb=http://localhost:8086/k6 tests/spike-test.js",
+
+    "infra:up":   "docker-compose up -d",
+    "infra:down": "docker-compose down",
+    "infra:logs": "docker-compose logs -f"
+  },
+  "keywords": ["k6", "load-testing", "performance", "influxdb", "grafana"],
+  "license": "MIT"
+}
